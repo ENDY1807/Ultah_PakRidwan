@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Game Ultah</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="gameContainer">
+        <div id="score">Skor: 0 | Surat Terkumpul: 0/3</div>
+        <div id="hat">🎩</div>
+        <div id="hearts"></div>
+        <div id="letters"></div>
+    </div>
+
+    <button id="letterButton" title="Lihat Surat">
+        <div class="icon">📬</div>
+        <div class="progress">0/3</div>
+    </button>
+
+    <div id="letterModal">
+        <div class="modal-content">
+            <h2>Surat yang Terkumpul</h2>
+            <div id="collectedLetters"></div>
+            <button id="closeModal">Tutup</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
