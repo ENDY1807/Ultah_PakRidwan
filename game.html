@@ -1,0 +1,680 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Selamat Ulang Tahun Pak Ridwan 🎉</title>
+<style>
+  :root{
+    --accent:#ff3c78;
+    --accent-2:#ff9bb3;
+    --bg1:#fff1f6;
+    --bg2:#fffaf2;
+    --card:#ffffffcc;
+    --glass: rgba(255,255,255,0.6);
+  }
+  *{box-sizing:border-box}
+  html,body{height:100%;margin:0;font-family:Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
+  body{
+    background: linear-gradient(180deg,var(--bg1),var(--bg2));
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:20px;
+    -webkit-font-smoothing:antialiased;
+    -moz-osx-font-smoothing:grayscale;
+  }
+
+  /* layout container */
+  .wrapper{
+    width:100%;
+    max-width:1100px;
+    background: linear-gradient(180deg, rgba(255,255,255,0.85), rgba(255,255,255,0.92));
+    box-shadow: 0 12px 40px rgba(0,0,0,0.12);
+    border-radius:16px;
+    overflow:hidden;
+    display:grid;
+    grid-template-columns: 1fr 420px;
+    gap:1px;
+  }
+
+  /* mobile: single column */
+  @media (max-width:880px){
+    .wrapper{grid-template-columns:1fr;max-height:100vh; height:100%;}
+    .side{height:320px}
+  }
+
+  /* left: game + header */
+  .main{
+    padding:22px;
+    position:relative;
+    min-height:520px;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:flex-start;
+    gap:12px;
+  }
+
+  header h1{
+    margin:0;
+    color:var(--accent);
+    font-size:clamp(20px,3.5vw,30px);
+    letter-spacing:0.5px;
+  }
+  header p{
+    margin:4px 0 0 0;
+    color:#333;
+    font-size:clamp(13px,1.8vw,16px);
+  }
+
+  /* canvas / area game */
+  .stage{
+    width:100%;
+    flex:1 1 auto;
+    position:relative;
+    overflow:hidden;
+    border-radius:12px;
+    background: linear-gradient(180deg,#fff,#ffeef6);
+    border: 1px solid rgba(0,0,0,0.04);
+    display:flex;
+    align-items:flex-end;
+    justify-content:center;
+  }
+
+  canvas#bgCanvas{ position:absolute; inset:0; z-index:0; display:block; width:100%; height:100%; }
+  .hud{
+    z-index:8;
+    position:relative;
+    width:100%;
+    padding:12px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+  }
+
+  /* hat (emoji) */
+  #hat{
+    position:absolute;
+    bottom:4%;
+    left:50%;
+    transform: translateX(-50%) rotateX(-25deg) rotateY(180deg) scaleY(-1) translateZ(0px);
+    width:86px;
+    height:100px;
+    font-size:68px;
+    line-height:1;
+    text-align:center;
+    cursor:grab;
+    transition: transform 0.08s ease, left 0.08s ease;
+    z-index:10;
+    user-select:none;
+    -webkit-user-select:none;
+    text-shadow:5px 5px 12px rgba(0,0,0,0.35), -3px -3px 6px rgba(255,255,255,0.3), 0 12px 22px rgba(0,0,0,0.28);
+    filter: drop-shadow(0 12px 18px rgba(0,0,0,0.25));
+    touch-action:none;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+  }
+
+  #hat.blink{ animation:hatBlink 360ms ease-in-out; }
+  @keyframes hatBlink{
+    0%,100%{ transform: translateX(-50%) rotateX(-25deg) rotateY(180deg) scaleY(-1) translateZ(0px) scale(1); filter:drop-shadow(0 12px 18px rgba(0,0,0,0.25)); }
+    50% { transform: translateX(-50%) rotateX(-25deg) rotateY(180deg) scaleY(-1) translateZ(10px) scale(1.08); filter: drop-shadow(0 0 28px rgba(255,200,50,0.5)); text-shadow:0 0 20px rgba(255,240,200,0.9); }
+  }
+
+  /* falling objects container */
+  .objects{ position:absolute; inset:0; pointer-events:none; z-index:6; }
+
+  .fall{
+    position:absolute;
+    font-size:36px;
+    pointer-events:none;
+    transform-origin:center;
+    transition: all 240ms ease;
+    will-change: transform, opacity, top, left;
+    text-shadow:0 6px 14px rgba(0,0,0,0.12);
+  }
+
+  .letter{
+    width:48px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;
+    background: linear-gradient(180deg,#fff7d9,#fff0b8); border:2px solid #ffd96a;
+    font-weight:700;
+    font-family: "Courier New", monospace;
+  }
+
+  .heart{ font-size:38px; filter: drop-shadow(0 8px 12px rgba(0,0,0,0.14)); }
+
+  /* right side card */
+  .side{
+    padding:22px;
+    background: linear-gradient(180deg,var(--card), rgba(255,255,255,0.9));
+    display:flex;
+    flex-direction:column;
+    gap:14px;
+    align-items:stretch;
+    justify-content:flex-start;
+  }
+  .card{
+    background:var(--glass);
+    border-radius:12px;
+    padding:14px;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.06);
+    border:1px solid rgba(255,255,255,0.6);
+  }
+
+  .score{ font-size:14px; color:#333; }
+  .controls{ display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap; }
+  .btn{
+    background:var(--accent);
+    color:white; border:none; padding:10px 12px; border-radius:10px; cursor:pointer; font-weight:600;
+    box-shadow: 0 6px 18px rgba(255,60,120,0.14);
+  }
+  .btn.secondary{ background:#fff; color:var(--accent); border:1px solid rgba(0,0,0,0.06); box-shadow:none; }
+
+  .small{ font-size:13px; color:#444; }
+
+  /* modal letters */
+  .modal{
+    position:fixed; inset:0; background:rgba(0,0,0,0.5); display:none; align-items:center; justify-content:center; z-index:40;
+  }
+  .modal.show{ display:flex; }
+  .modal .inner{ width:calc(100% - 40px); max-width:520px; background:#fff; padding:18px; border-radius:12px; }
+  .modal h3{ margin:0 0 8px 0; color:var(--accent); }
+  .letter-item{ background:#fafafa; border-left:4px solid #ffd56a; padding:10px; margin:8px 0; border-radius:8px; }
+
+  footer{ text-align:center; padding:12px; font-size:13px; color:#666; }
+
+  /* subtle responsive tweaks */
+  @media (max-width:520px){
+    .side{ padding:12px; display:none; } /* hide right panel for small phones to maximize area */
+    .main{ padding:12px; }
+    .wrapper{ border-radius:10px; }
+    #hat{ font-size:56px; width:76px; height:90px; bottom:6%; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrapper" role="application" aria-label="Selamat Ulang Tahun Pak Ridwan">
+  <div class="main">
+    <header>
+      <h1>🎉 Selamat Ulang Tahun, Pak Ridwan!</h1>
+      <p>Semoga panjang umur, sehat, dan penuh berkah. Ayo bantu topi ajaib nangkep hati & surat kejutan.</p>
+    </header>
+
+    <div class="stage" id="stage" aria-hidden="false">
+      <canvas id="bgCanvas"></canvas>
+
+      <div class="hud">
+        <div class="score small">Skor: <span id="score">0</span></div>
+        <div class="small">Surat: <span id="letterCount">0</span>/3</div>
+      </div>
+
+      <div id="hat" role="button" aria-label="Topi ajaib" tabindex="0">🎩</div>
+      <div class="objects" id="objects" aria-hidden="true"></div>
+    </div>
+
+    <div style="width:100%;display:flex;gap:10px;justify-content:center;margin-top:12px;">
+      <button class="btn" id="startBtn">Mulai Kejutan</button>
+      <button class="btn secondary" id="resetBtn">Reset</button>
+    </div>
+
+    <footer>Gunakan sentuh / drag di HP, tombol kiri/kanan di desktop untuk pindahkan topi.</footer>
+  </div>
+
+  <aside class="side">
+    <div class="card">
+      <h3 style="margin:0;color:var(--accent)">Kontrol & Musik</h3>
+      <p class="small">Kontrol: Drag topi (sentuh) atau panah kiri/kanan (keyboard). Musik di-generate otomatis, bisa play/pause & atur volume.</p>
+      <div style="display:flex;gap:8px;margin-top:10px;align-items:center;">
+        <button class="btn" id="musicToggle">Play Musik</button>
+        <input type="range" id="vol" min="0" max="1" step="0.01" value="0.35" style="flex:1">
+      </div>
+    </div>
+
+    <div class="card">
+      <h3 style="margin:0;color:var(--accent)">Surat Terkumpul</h3>
+      <div id="collectedList" style="margin-top:8px;">
+        <div class="small">Belum ada.</div>
+      </div>
+      <div style="margin-top:10px;display:flex;gap:8px;">
+        <button class="btn" id="viewLetters">Lihat Surat</button>
+        <button class="btn secondary" id="muteAll">Mute</button>
+      </div>
+    </div>
+
+    <div class="card" style="text-align:center">
+      <div style="font-weight:700;color:var(--accent)">Ucapan Singkat</div>
+      <div style="margin-top:8px;color:#333">“Selamat ulang tahun, Pak Ridwan. Semoga sehat selalu, sukses, dan penuh berkah.”</div>
+    </div>
+  </aside>
+</div>
+
+<!-- modal -->
+<div class="modal" id="letterModal" role="dialog" aria-modal="true" aria-hidden="true">
+  <div class="inner">
+    <h3>Surat yang terkumpul</h3>
+    <div id="modalLetters"></div>
+    <div style="display:flex;justify-content:flex-end;margin-top:12px;">
+      <button class="btn secondary" id="closeModal">Tutup</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ------------- basic responsive background canvas ------------- */
+const bgCanvas = document.getElementById('bgCanvas');
+const bgCtx = bgCanvas.getContext('2d');
+function fitBg(){
+  bgCanvas.width = Math.max(document.getElementById('stage').clientWidth, window.innerWidth);
+  bgCanvas.height = Math.max(document.getElementById('stage').clientHeight, window.innerHeight * 0.6);
+}
+window.addEventListener('resize', fitBg);
+fitBg();
+
+/* nice moving clouds/hearts background */
+let bgTime = 0;
+function drawBg(t){
+  bgTime = t*0.001;
+  bgCtx.clearRect(0,0,bgCanvas.width,bgCanvas.height);
+  // gradient
+  const g = bgCtx.createLinearGradient(0,0,0,bgCanvas.height);
+  g.addColorStop(0,'#fff8fc');
+  g.addColorStop(1,'#fff1f6');
+  bgCtx.fillStyle = g;
+  bgCtx.fillRect(0,0,bgCanvas.width,bgCanvas.height);
+  // moving soft circles
+  for(let i=0;i<6;i++){
+    const x = (Math.sin(bgTime*0.2 + i)*0.5 + 0.5) * bgCanvas.width;
+    const y = ((i*73)%bgCanvas.height) * 0.7 + 40;
+    const r = 120 + (i*10);
+    bgCtx.beginPath();
+    bgCtx.fillStyle = `rgba(255,200,230,${0.03 + i*0.01})`;
+    bgCtx.ellipse(x, y + Math.sin(bgTime*0.5 + i)*20, r, r*0.6, 0, 0, Math.PI*2);
+    bgCtx.fill();
+  }
+  requestAnimationFrame(drawBg);
+}
+requestAnimationFrame(drawBg);
+
+/* ------------- game / falling objects logic ------------- */
+const objectsContainer = document.getElementById('objects');
+const hat = document.getElementById('hat');
+const scoreEl = document.getElementById('score');
+const letterCountEl = document.getElementById('letterCount');
+const collectedList = document.getElementById('collectedList');
+const modal = document.getElementById('letterModal');
+const modalLetters = document.getElementById('modalLetters');
+const viewLettersBtn = document.getElementById('viewLetters');
+const closeModal = document.getElementById('closeModal');
+
+let score = 0;
+let collected = [];
+const totalLetters = 3;
+const lettersContent = [
+  "Surat ke-1: Selamat datang di kejutan ini! Semoga hari ini penuh suka cita.",
+  "Surat ke-2: Terus semangat dan sehat selalu, Pak Ridwan.",
+  "Surat ke-3: Doa kami menyertaimu. Selamat ulang tahun!"
+];
+
+function updateHUD(){
+  scoreEl.textContent = score;
+  letterCountEl.textContent = collected.length;
+  // update list
+  collectedList.innerHTML = '';
+  if(collected.length === 0){
+    collectedList.innerHTML = '<div class="small">Belum ada.</div>';
+  } else {
+    collected.forEach(i=>{
+      const d = document.createElement('div');
+      d.className = 'letter-item';
+      d.textContent = `Surat ke-${i+1}: ${lettersContent[i].slice(0,50)}${lettersContent[i].length>50?'...':''}`;
+      collectedList.appendChild(d);
+    });
+  }
+}
+
+/* create falling element DOM */
+function spawn(type){
+  const el = document.createElement('div');
+  el.className = 'fall ' + (type === 'heart' ? 'heart' : 'letter');
+  el.style.left = (6 + Math.random()*88) + '%';
+  el.style.top = '-60px';
+  el.style.opacity = '1';
+  if(type === 'letter'){
+    el.classList.add('letter');
+    el.textContent = (collected.length < totalLetters) ? `✉${collected.length+1}` : '✉';
+    el.style.fontSize = '22px';
+    el.style.width = '48px';
+    el.style.height = '36px';
+  } else {
+    el.textContent = '❤️';
+  }
+  objectsContainer.appendChild(el);
+
+  const speed = 1.2 + Math.random()*2.2;
+  const rotate = (Math.random()*40-20);
+  const leftPx = () => (el.offsetLeft + el.offsetWidth/2);
+  // animate via requestAnimationFrame
+  let last = performance.now();
+  function step(now){
+    const dt = (now - last) / 16.666; // approx frames
+    last = now;
+    const curTop = parseFloat(el.style.top);
+    el.style.top = (curTop + speed*dt) + 'px';
+    el.style.transform = `rotate(${rotate * (now*0.0004)}deg)`;
+    // remove if out
+    const stageRect = document.getElementById('stage').getBoundingClientRect();
+    const elRect = el.getBoundingClientRect();
+    if(elRect.top > stageRect.bottom + 80){
+      el.remove();
+      return;
+    }
+    // check collision with hat
+    const hatRect = hat.getBoundingClientRect();
+    if(elRect.bottom >= hatRect.top && elRect.top <= hatRect.bottom &&
+       elRect.right >= hatRect.left && elRect.left <= hatRect.right){
+      // caught
+      caught(el, type);
+      return;
+    }
+    requestAnimationFrame(step);
+  }
+  requestAnimationFrame(step);
+}
+
+/* caught behavior */
+function caught(el, type){
+  // animate into hat: shrink/move-to-hat center
+  const hatRect = hat.getBoundingClientRect();
+  const elRect = el.getBoundingClientRect();
+  const dx = (hatRect.left + hatRect.width/2) - (elRect.left + elRect.width/2);
+  const dy = (hatRect.top + hatRect.height/2) - (elRect.top + elRect.height/2);
+  el.style.transition = 'transform 480ms ease, top 480ms ease, left 480ms ease, opacity 480ms ease';
+  el.style.transform = `translate(${dx}px, ${dy}px) scale(0.2)`;
+  el.style.opacity = '0';
+  hat.classList.add('blink');
+  setTimeout(()=> hat.classList.remove('blink'), 420);
+
+  setTimeout(()=>{
+    try{ el.remove(); }catch(e){}
+    if(type === 'heart'){ score += 10; }
+    else {
+      // add letter if available
+      const nextIndex = collected.length;
+      if(nextIndex < totalLetters){
+        collected.push(nextIndex);
+      } else {
+        score += 5; // extra letters -> points
+      }
+    }
+    updateHUD();
+    // win condition
+    if(collected.length === totalLetters){
+      // show congrats toast modal
+      setTimeout(()=> {
+        showCongrats();
+      }, 400);
+      stopSpawning();
+    }
+  }, 500);
+}
+
+/* spawn loop */
+let spawnTimer = null;
+function startSpawning(){
+  if(spawnTimer) return;
+  spawnTimer = setInterval(()=>{
+    if(Math.random() < 0.7) spawn('heart');
+    if(collected.length < totalLetters && Math.random() < 0.35) spawn('letter');
+  }, 900);
+}
+function stopSpawning(){
+  if(spawnTimer){ clearInterval(spawnTimer); spawnTimer = null; }
+}
+
+/* start/reset handlers */
+document.getElementById('startBtn').addEventListener('click', ()=>{
+  startSpawning();
+  document.getElementById('startBtn').style.display = 'none';
+});
+document.getElementById('resetBtn').addEventListener('click', ()=>{
+  score = 0; collected = []; updateHUD();
+  // clear existing elements
+  document.querySelectorAll('.objects .fall').forEach(n=>n.remove());
+  document.getElementById('startBtn').style.display = 'inline-block';
+  stopSpawning();
+});
+
+/* view letters modal */
+viewLettersBtn.addEventListener('click', ()=>{
+  populateModal();
+  modal.classList.add('show');
+  modal.setAttribute('aria-hidden','false');
+});
+closeModal.addEventListener('click', ()=>{
+  modal.classList.remove('show');
+  modal.setAttribute('aria-hidden','true');
+});
+function populateModal(){
+  modalLetters.innerHTML = '';
+  if(collected.length === 0){
+    modalLetters.innerHTML = '<div class="small">Belum ada surat.</div>';
+  } else {
+    collected.forEach(i=>{
+      const d = document.createElement('div');
+      d.className = 'letter-item';
+      d.innerHTML = `<strong>Surat ke-${i+1}</strong><div style="margin-top:6px">${lettersContent[i]}</div>`;
+      modalLetters.appendChild(d);
+    });
+  }
+}
+
+/* show congrats popup (simple) */
+function showCongrats(){
+  alert('Selamat! Semua surat sudah terkumpul 🎉');
+}
+
+/* ------------- input: drag/touch/keyboard for hat ------------- */
+const stage = document.getElementById('stage');
+let dragging = false;
+let dragOffsetX = 0;
+
+function clampHatLeft(px){
+  const st = stage.getBoundingClientRect();
+  const h = hat.getBoundingClientRect();
+  let left = px;
+  const min = st.left + 10;
+  const max = st.right - h.width - 10;
+  left = Math.max(min, Math.min(max, left));
+  hat.style.left = ((left - st.left) / st.width * 100) + '%';
+}
+
+/* mouse */
+hat.addEventListener('mousedown', (ev)=>{
+  dragging = true;
+  hat.style.cursor = 'grabbing';
+  const st = stage.getBoundingClientRect();
+  dragOffsetX = ev.clientX - hat.getBoundingClientRect().left;
+});
+document.addEventListener('mousemove', (ev)=>{
+  if(!dragging) return;
+  const left = ev.clientX - dragOffsetX;
+  clampHatLeft(left);
+  syncHatTransformByPointer(ev.clientX, ev.clientY);
+});
+document.addEventListener('mouseup', ()=>{ dragging=false; hat.style.cursor='grab'; });
+
+/* touch */
+hat.addEventListener('touchstart', (ev)=>{
+  ev.preventDefault();
+  dragging = true;
+  const t = ev.touches[0];
+  const st = stage.getBoundingClientRect();
+  dragOffsetX = t.clientX - hat.getBoundingClientRect().left;
+});
+document.addEventListener('touchmove', (ev)=>{
+  if(!dragging) return;
+  const t = ev.touches[0];
+  const left = t.clientX - dragOffsetX;
+  clampHatLeft(left);
+  syncHatTransformByPointer(t.clientX, t.clientY);
+});
+document.addEventListener('touchend', ()=>{ dragging=false; });
+
+/* keyboard */
+document.addEventListener('keydown',(e)=>{
+  const step = Math.max(28, stage.clientWidth * 0.06);
+  if(e.key === 'ArrowLeft'){ // move left
+    const curLeft = hat.getBoundingClientRect().left;
+    clampHatLeft(curLeft - step);
+  } else if(e.key === 'ArrowRight'){
+    const curLeft = hat.getBoundingClientRect().left;
+    clampHatLeft(curLeft + step);
+  }
+});
+
+/* sync transform (flip/rotation) for inverted hat */
+function syncHatTransformByPointer(clientX, clientY){
+  const st = stage.getBoundingClientRect();
+  const mousePercentX = (clientX - st.left)/st.width - 0.5;
+  const mousePercentY = (clientY - st.top)/st.height - 0.5;
+  const rotateY = mousePercentX * 18;
+  const rotateX = -25 - (mousePercentY * 12);
+  // remember hat default includes rotateY(180deg) scaleY(-1), so we add +180 to rotateY to keep visual consistent
+  hat.style.transform = `translateX(-50%) rotateX(${rotateX}deg) rotateY(${rotateY + 180}deg) scaleY(-1) translateZ(0px)`;
+}
+
+/* ensure hat transform resets nicely when not interacting */
+stage.addEventListener('mouseleave', ()=> {
+  hat.style.transform = 'translateX(-50%) rotateX(-25deg) rotateY(180deg) scaleY(-1) translateZ(0px)';
+});
+stage.addEventListener('mouseenter', ()=> {
+  // keep as is
+});
+
+/* ------------- misc: cleanup on visibility change ------------- */
+document.addEventListener('visibilitychange', ()=>{
+  if(document.hidden) stopSpawning();
+});
+
+/* ------------- initial HUD ------------- */
+updateHUD();
+
+/* ------------- music - WebAudio simple ambient melody ------------- */
+let audioCtx = null;
+let masterGain = null;
+let isPlaying = false;
+const musicToggle = document.getElementById('musicToggle');
+const volSlider = document.getElementById('vol');
+const muteBtn = document.getElementById('muteAll');
+
+function setupAudio(){
+  if(audioCtx) return;
+  audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+  masterGain = audioCtx.createGain();
+  masterGain.gain.value = parseFloat(volSlider.value || 0.35);
+  masterGain.connect(audioCtx.destination);
+}
+
+/* synth pattern */
+let musicNodes = [];
+function playMusic(){
+  setupAudio();
+  if(isPlaying) return;
+  isPlaying = true;
+  musicToggle.textContent = 'Pause Musik';
+  // create a simple arpeggio-ish pattern
+  const now = audioCtx.currentTime;
+  let t = now + 0.02;
+  const bpm = 70;
+  const beat = 60 / bpm;
+  const root = 330; // E4-ish (bright)
+  const scale = [0, 3, 7, 10]; // minor-ish intervals in semitones
+
+  // schedule repeated sequence
+  for(let bar=0; bar<999; bar++){
+    for(let i=0;i<8;i++){
+      const idx = (bar + i) % scale.length;
+      const freq = root * Math.pow(2, scale[idx]/12) * (Math.random() < 0.05 ? 2 : 1);
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      gain.gain.value = 0.0001;
+      osc.connect(gain);
+      gain.connect(masterGain);
+      osc.start(t);
+      // envelope
+      gain.gain.linearRampToValueAtTime(0.08, t + 0.02);
+      gain.gain.exponentialRampToValueAtTime(0.0001, t + beat*1.2);
+      osc.stop(t + beat*1.2 + 0.02);
+      musicNodes.push({osc, gain});
+      t += beat * 0.75;
+    }
+    if(!isPlaying) break;
+  }
+  // gentle pad via oscillator
+  const pad = audioCtx.createOscillator();
+  const padGain = audioCtx.createGain();
+  pad.type = 'sine';
+  pad.frequency.value = root/2; // low pad
+  padGain.gain.value = 0.03;
+  padGain.connect(masterGain);
+  pad.connect(padGain);
+  pad.start();
+  musicNodes.push({osc:pad, gain:padGain, isPad:true});
+}
+
+function stopMusic(){
+  if(!audioCtx) return;
+  isPlaying = false;
+  musicToggle.textContent = 'Play Musik';
+  // stop nodes
+  musicNodes.forEach(n=>{
+    try{ n.osc.stop(); }catch(e){}
+    try{ n.gain.disconnect(); }catch(e){}
+  });
+  musicNodes = [];
+}
+
+/* hook up controls */
+musicToggle.addEventListener('click', ()=>{
+  if(!audioCtx) setupAudio();
+  if(!isPlaying){
+    // resume context if needed
+    if(audioCtx.state === 'suspended') audioCtx.resume();
+    playMusic();
+  } else {
+    stopMusic();
+  }
+});
+volSlider.addEventListener('input', (e)=>{
+  if(masterGain) masterGain.gain.value = parseFloat(e.target.value);
+});
+muteBtn.addEventListener('click', ()=>{
+  if(masterGain){
+    masterGain.gain.value = 0;
+    volSlider.value = 0;
+  }
+});
+
+/* ------------- utility: spawn initial gentle objects so stage doesn't empty ------------- */
+let initialSpawned = 0;
+function warmUp(){
+  for(let i=0;i<6;i++){
+    setTimeout(()=>spawn('heart'), i*240);
+  }
+  for(let j=0;j<2;j++){
+    setTimeout(()=>spawn('letter'), 600 + j*900);
+  }
+}
+warmUp();
+
+/* ------------- expose for debugging in console (optional) ------------- */
+window._game = { spawn, startSpawning, stopSpawning, scoreRef: ()=>score, collectedRef: ()=>collected };
+
+</script>
+</body>
+</html>
