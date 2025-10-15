@@ -235,4 +235,125 @@ body {
             border-radius: 5px;
             cursor: pointer;
             margin-top: 10px;
+
         }
+
+            /* Responsif untuk perangkat dengan lebar maksimal 768px */
+@media (max-width: 768px) {
+    body {
+        background: linear-gradient(to bottom, #87CEEB, #98FB98);
+        font-family: Arial, sans-serif;
+        height: auto; /* Menyesuaikan dengan tinggi layar perangkat */
+    }
+
+    #gameContainer {
+        width: 100vw;
+        height: 100vh;
+        overflow: hidden;
+    }
+
+    #hat {
+        position: absolute;
+        bottom: 10%;
+        left: 50%;
+        transform: translateX(-50%) rotateX(-25deg) rotateY(180deg) scaleY(-1) translateZ(0px);
+        width: 60px; /* Ukuran topi lebih kecil */
+        height: 80px;
+        font-size: 50px; /* Ukuran emoji topi lebih kecil */
+        line-height: 1;
+        text-align: center;
+        cursor: pointer;
+        transition: transform 0.1s ease, left 0.1s ease;
+        z-index: 10;
+    }
+
+    .falling-object {
+        font-size: 30px; /* Ukuran objek yang jatuh lebih kecil */
+        animation: fall linear infinite;
+        z-index: 5;
+        transition: all 0.3s ease;
+    }
+
+    #score {
+        position: absolute;
+        top: 10px;
+        left: 10px;
+        font-size: 18px; /* Ukuran font skor lebih kecil */
+        color: #333;
+        z-index: 20;
+    }
+
+    #letterButton {
+        width: 60px; /* Ukuran tombol surat lebih kecil */
+        height: 60px;
+        font-size: 10px;
+    }
+
+    #letterModal {
+        padding: 15px;
+        max-width: 250px; /* Lebar modal lebih kecil */
+    }
+
+    .modal-content {
+        max-width: 250px; /* Lebar konten modal disesuaikan */
+        padding: 15px;
+    }
+
+    .letter-item {
+        padding: 8px; /* Padding surat lebih kecil */
+    }
+
+    .letter-item h3 {
+        font-size: 16px; /* Ukuran font surat lebih kecil */
+    }
+
+    #closeModal {
+        padding: 8px 15px; /* Ukuran tombol lebih kecil */
+        font-size: 14px;
+    }
+}
+
+/* Responsif untuk perangkat dengan lebar maksimal 480px (misalnya ponsel kecil) */
+@media (max-width: 480px) {
+    #hat {
+        width: 50px; /* Ukuran topi lebih kecil lagi */
+        height: 70px;
+        font-size: 40px; /* Ukuran emoji topi lebih kecil */
+    }
+
+    .falling-object {
+        font-size: 25px; /* Ukuran objek jatuh lebih kecil */
+    }
+
+    #score {
+        top: 5px;
+        left: 5px;
+        font-size: 16px; /* Ukuran font skor lebih kecil */
+    }
+
+    #letterButton {
+        width: 50px; /* Ukuran tombol surat lebih kecil */
+        height: 50px;
+    }
+
+    #letterModal {
+        padding: 10px;
+    }
+
+    .modal-content {
+        padding: 10px;
+    }
+
+    .letter-item {
+        padding: 6px; /* Padding surat lebih kecil */
+    }
+
+    .letter-item h3 {
+        font-size: 14px; /* Ukuran font surat lebih kecil */
+    }
+
+    #closeModal {
+        padding: 6px 12px; /* Ukuran tombol lebih kecil */
+        font-size: 12px;
+    }
+}
