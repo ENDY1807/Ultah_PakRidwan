@@ -565,10 +565,12 @@ updateHUD();
 /* ------------- music - WebAudio simple ambient melody ------------- */
 let audioCtx = null;
 let masterGain = null;
-let isPlaying = false;
+let audioBuffer = null;
+let musicSource = null;
 const musicToggle = document.getElementById('musicToggle');
 const volSlider = document.getElementById('vol');
 const muteBtn = document.getElementById('muteAll');
+let isPlaying = false;
 
 function setupAudio(){
   if(audioCtx) return;
@@ -578,87 +580,56 @@ function setupAudio(){
   masterGain.connect(audioCtx.destination);
 }
 
-/* synth pattern */
-let musicNodes = [];
-function playMusic(){
+async function loadMusic(){
   setupAudio();
+  if(audioBuffer) return; // sudah pernah load
+  const res = await fetch('lagu.mp3');
+  const arrayBuffer = await res.arrayBuffer();
+  audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+}
+
+async function playMusic(){
+  await loadMusic();
   if(isPlaying) return;
   isPlaying = true;
+  musicSource = audioCtx.createBufferSource();
+  musicSource.buffer = audioBuffer;
+  musicSource.loop = true;
+  musicSource.connect(masterGain);
+  musicSource.start();
   musicToggle.textContent = 'Pause Musik';
-  // create a simple arpeggio-ish pattern
-  const now = audioCtx.currentTime;
-  let t = now + 0.02;
-  const bpm = 70;
-  const beat = 60 / bpm;
-  const root = 330; // E4-ish (bright)
-  const scale = [0, 3, 7, 10]; // minor-ish intervals in semitones
-
-  // schedule repeated sequence
-  for(let bar=0; bar<999; bar++){
-    for(let i=0;i<8;i++){
-      const idx = (bar + i) % scale.length;
-      const freq = root * Math.pow(2, scale[idx]/12) * (Math.random() < 0.05 ? 2 : 1);
-      const osc = audioCtx.createOscillator();
-      const gain = audioCtx.createGain();
-      osc.type = 'sine';
-      osc.frequency.value = freq;
-      gain.gain.value = 0.0001;
-      osc.connect(gain);
-      gain.connect(masterGain);
-      osc.start(t);
-      // envelope
-      gain.gain.linearRampToValueAtTime(0.08, t + 0.02);
-      gain.gain.exponentialRampToValueAtTime(0.0001, t + beat*1.2);
-      osc.stop(t + beat*1.2 + 0.02);
-      musicNodes.push({osc, gain});
-      t += beat * 0.75;
-    }
-    if(!isPlaying) break;
-  }
-  // gentle pad via oscillator
-  const pad = audioCtx.createOscillator();
-  const padGain = audioCtx.createGain();
-  pad.type = 'sine';
-  pad.frequency.value = root/2; // low pad
-  padGain.gain.value = 0.03;
-  padGain.connect(masterGain);
-  pad.connect(padGain);
-  pad.start();
-  musicNodes.push({osc:pad, gain:padGain, isPad:true});
 }
 
 function stopMusic(){
-  if(!audioCtx) return;
+  if(!isPlaying || !musicSource) return;
   isPlaying = false;
+  musicSource.stop();
+  musicSource.disconnect();
   musicToggle.textContent = 'Play Musik';
-  // stop nodes
-  musicNodes.forEach(n=>{
-    try{ n.osc.stop(); }catch(e){}
-    try{ n.gain.disconnect(); }catch(e){}
-  });
-  musicNodes = [];
 }
 
-/* hook up controls */
+/* Controls */
 musicToggle.addEventListener('click', ()=>{
-  if(!audioCtx) setupAudio();
+  setupAudio();
   if(!isPlaying){
-    // resume context if needed
     if(audioCtx.state === 'suspended') audioCtx.resume();
     playMusic();
   } else {
     stopMusic();
   }
 });
+
 volSlider.addEventListener('input', (e)=>{
   if(masterGain) masterGain.gain.value = parseFloat(e.target.value);
 });
+
 muteBtn.addEventListener('click', ()=>{
   if(masterGain){
     masterGain.gain.value = 0;
     volSlider.value = 0;
   }
 });
+  
 
 /* ------------- utility: spawn initial gentle objects so stage doesn't empty ------------- */
 let initialSpawned = 0;
@@ -678,3 +649,4 @@ window._game = { spawn, startSpawning, stopSpawning, scoreRef: ()=>score, collec
 </script>
 </body>
 </html>
+
