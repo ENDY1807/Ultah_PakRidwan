@@ -583,7 +583,7 @@ function setupAudio(){
 async function loadMusic(){
   setupAudio();
   if(audioBuffer) return; // sudah pernah load
-  const res = await fetch('lagu.mp3');
+  const res = await fetch('Candlelight Wishes.mp3');
   const arrayBuffer = await res.arrayBuffer();
   audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
 }
@@ -649,4 +649,5 @@ window._game = { spawn, startSpawning, stopSpawning, scoreRef: ()=>score, collec
 </script>
 </body>
 </html>
+
 
